@@ -46,7 +46,11 @@ choice = input(Fore.LIGHTCYAN_EX + "> ")
 
 if choice == '1':
     os.system("cls")
-    dc_auth = input(Fore.LIGHTGREEN_EX + "[AUTHORIZATION] " + Fore.WHITE + "Enter any discord bot token (Used for acccessing Discord API): ")
+    try:
+        with open('token.txt', 'r') as token_file:
+            dc_auth = token_file.readline().strip()
+    except FileNotFoundError:
+        error("Token file not found. Please enter a token in the first line of token.txt")
     check_token_valid(dc_auth)
     bridge("Getting API...")
     time.sleep(1)
