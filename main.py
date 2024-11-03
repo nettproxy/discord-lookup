@@ -28,11 +28,13 @@ print("\n".join(f"\033[38;2;255;{int(255 * i / 5)};0m{line}\033[0m" for i, line 
     '╚═════╝  ╚═════╝    ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝'
 ])) + "\033[0m")
 ctypes.windll.kernel32.SetConsoleTitleW("Discord Lookup made by monokai <3")
-print(Fore.YELLOW + '╔══════════════════════════════╦══════════════════════════╦══════════════════════════════╗')
-print(Fore.YELLOW + f'║                              ║{Fore.LIGHTYELLOW_EX}       MENU OPTIONS{Fore.RED}       ║                              ║')
-print(Fore.YELLOW + '╠══════════════════════════════╬══════════════════════════╬══════════════════════════════╣')
-print(Fore.RED + '║     [01] USER LOOKUP         ║     [02] BOT LOOKUP      ║     [03] GUILD LOOKUP        ║')
-print(Fore.YELLOW + '╚══════════════════════════════╩══════════════════════════╩══════════════════════════════╝')
+print(Fore.YELLOW + '╔══════════════════════════════╦══════════════════════════╦════════════════════════════════════════════╗')
+print(Fore.YELLOW + f'║                              ║{Fore.LIGHTYELLOW_EX}       MENU OPTIONS{Fore.RED}       ║                                            ║')
+print(Fore.YELLOW + '╠══════════════════════════════╬══════════════════════════╬════════════════════════════════════════════╣')
+print(Fore.RED + '║     [01] USER LOOKUP         ║     [02] BOT LOOKUP      ║     [03] GUILD LOOKUP                      ║')
+print(Fore.YELLOW + '╠══════════════════════════════╬══════════════════════════╬════════════════════════════════════════════╣')
+print(Fore.RED + '║     [04] CFX LOOKUP          ║     [05] SOON            ║     [06] EXIT                              ║')
+print(Fore.YELLOW + '╚══════════════════════════════╩══════════════════════════╩════════════════════════════════════════════╝')
 
 def check_token_valid(token):
     r = requests.get('https://discord.com/api/v10/users/849566937846382614', headers={"Authorization": "Bot " + token})
@@ -130,3 +132,26 @@ elif choice == '3':
             success("Channels: " + channels_output.replace('🏫',""))
     else:
         error(f"The guild is either non-existant, unavailable, or has Server Widget/Discovery disabled.")
+elif choice == '4':
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Referer": "https://servers-frontend.fivem.net/",
+        "Origin": "https://servers-frontend.fivem.net",
+        "Application-Type": "application/json"
+    }
+    os.system("cls")
+    bridge("Getting API...")
+    time.sleep(1)
+    id = input(Fore.YELLOW + "[DISCORD LOOKUP] " + Fore.WHITE + "Enter CFX ID: ")
+    request = requests.get(f'https://servers-frontend.fivem.net/api/servers/single/{id}', headers=headers)
+    data = request.json()
+    if request.status_code == 200:
+        success("Hostname: " + data['Data']['hostname'])
+        success("Slots: " + str(int(data['Data']['sv_maxclients'])))
+        success("Clients: " + str(int(data['Data']['clients'])))
+        success("Server Owner Name: " + data['Data']['ownerName'])
+        success("Server Owner Profile: " + data['Data']['ownerProfile'])
+        success("IP: " + data['Data']['connectEndPoints'][0])
+    else:
+        error("not found")
