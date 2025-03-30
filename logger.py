@@ -39,3 +39,6 @@ def printsinglethread(*args, **kwargs):
         print("")
         print(Fore.MAGENTA + "[THREAD]", *args, **kwargs)
         print("")
+
+def print_cfx(*args, **kwargs):
+    print(Fore.CYAN + "[CFX]", *args, **kwargs)

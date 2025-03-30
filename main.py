@@ -1,7 +1,7 @@
 import requests
 import os, colorama, time, ctypes, webbrowser, base64, random, getpass
 from github import Github
-from logger import debug, info, error, bridge, success
+from logger import debug, info, error, bridge, success, print_cfx
 from colorama import Fore
 
 def snowflake_to_date(snowflake_id):
@@ -53,14 +53,14 @@ def add_file_to_repo(token, repo_name, file_path, file_content, commit_message):
 
 def check_token_valid(token):
     r = requests.get('https://discord.com/api/v10/users/849566937846382614', headers={"Authorization": "Bot " + token})
-    if r.status_code == 200:
+    if r.status_code == 200 or r.status_code == 204:
         success("Valid token")
     else:
         error("Invalid token")
         exit()
 
 
-choice = input(f"""{Fore.RED} {Fore.RED}┌──({Fore.RED}{getpass.getuser()}@{os.environ['COMPUTERNAME']})─{Fore.RED}[{Fore.RED}~/monokaiidev/discord-lookup]
+choice = input(f"""{Fore.RED} {Fore.RED}┌──({Fore.CYAN}{getpass.getuser()}@{os.environ['COMPUTERNAME']})─{Fore.RED}[{Fore.GREEN}~/nettproxy/discord-lookup{Fore.RED}]
  └─{Fore.RED}$ {Fore.RESET}""")
 
 if choice == '1':
@@ -93,14 +93,15 @@ if choice == '1':
         print(" ")
         success("Username: " + (data["username"]) if data['username'] and data['username'] else 'No username')
         success("Display Name: " + (data['global_name']) if data['global_name'] and data['global_name'] else 'Display Name: ' + data['username'])
-        success("Created At: " + snowflake_to_date(data['id']).strftime('%Y-%m-%d %H:%M:%S'))
-        # success("Discriminator: " + str(data["discriminator"]))
+        success("Created At: " + snowflake_to_date(data['id']).strftime('%Y-%m-%d %H:%M:%S') + " MEZ")
         success("ID: " + data["id"])
-        # success("Avatar: " + (data['avatar'] if data['avatar'] and data['avatar'] else 'No avatar'))
-        # success("Banner: " + (data['banner'] if data['banner'] and data['banner'] else 'No banner'))
-        success("Clan Tag: " + (data['clan']['tag'] if data['clan'] and data['clan']['tag'] else 'No clan'))
-        success("Clan Guild ID: " + (data['clan']['identity_guild_id'] if data['clan'] and data['clan']['identity_guild_id'] else 'No clan guild ID'))
+        if (data['banner']):
+            banner_url = f"https://cdn.discordapp.com/banners/{data['id']}/{data['banner']}.png?size=1024"
+        else:
+            banner_url = "No banner"
         success("Banner Color: " + (data['banner_color'] if data['banner_color'] and data['banner_color'] else "No banner color"))
+        
+        success("Banner URL: " + banner_url)
         # success("IP Address: " + generate_random_ip() + " (close to your IP)") (FAKE)
         # success("Nitro: " + nitro_types[data['premium_type']])
     else:
@@ -168,12 +169,12 @@ elif choice == '4':
     request = requests.get(f'https://servers-frontend.fivem.net/api/servers/single/{id}', headers=headers)
     data = request.json()
     if request.status_code == 200:
-        success("Hostname: " + data['Data']['hostname'])
-        success("Slots: " + str(int(data['Data']['sv_maxclients'])))
-        success("Clients: " + str(int(data['Data']['clients'])))
-        success("Server Owner Name: " + data['Data']['ownerName'])
-        success("Server Owner Profile: " + data['Data']['ownerProfile'])
-        success("IP: " + data['Data']['connectEndPoints'][0])
+        print_cfx("Hostname: " + data['Data']['hostname'])
+        print_cfx("Slots: " + str(int(data['Data']['sv_maxclients'])))
+        print_cfx("Clients: " + str(int(data['Data']['clients'])))
+        print_cfx("Server Owner Name: " + data['Data']['ownerName'])
+        print_cfx("Server Owner Profile: " + data['Data']['ownerProfile'])
+        print_cfx("IP: " + data['Data']['connectEndPoints'][0])
     else:
         error("not found")
 elif choice == '5':
